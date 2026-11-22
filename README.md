@@ -66,6 +66,6 @@ Do not use static export or GitHub Pages: the application needs its Next.js serv
 
 ## Verification status
 
-TypeScript and the optimized production build passed. Browser checks covered registration, role redirect, persistent sessions, service search, appointment request, admin confirmation, and mobile navigation. Production checks also passed for Google sign-in, administrator email sign-in, database-backed services, customer booking, administrator confirmation, session refresh, JWT access, and ImgBB image delivery. Google OAuth is published for basic profile/email access. Stripe Checkout remains disabled until a usable Stripe test secret and webhook signing secret are configured; real Checkout has not been tested.
+TypeScript and the optimized production build passed. Browser checks covered registration, role redirect, persistent sessions, service search, appointment request, admin confirmation, and mobile navigation. Production checks also passed for Google sign-in, administrator email sign-in, database-backed services, customer booking, administrator confirmation, session refresh, JWT access, ImgBB image delivery, Stripe test Checkout, and webhook-confirmed payment status. Google OAuth is published for basic profile/email access. Stripe test credentials remain private in Vercel.
 
 Salon contact information and social destinations are demonstration details. Service photographs are served from Unsplash. Replace them with the salon's actual details before a business launch.
