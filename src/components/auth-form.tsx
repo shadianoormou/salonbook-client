@@ -1,0 +1,27 @@
+'use client';
+import Link from 'next/link';
+import { useEffect,useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Eye,EyeOff,LoaderCircle,ShieldCheck } from 'lucide-react';
+import { authClient } from '@/lib/auth-client';
+import { useAuth } from './auth-provider';
+import { useLoad } from '@/lib/use-load';
+import { AppConfig } from '@/lib/types';
+import { toast } from 'sonner';
+export function AuthForm({mode}:{mode:'sign-in'|'sign-up'}){
+  const signup=mode==='sign-up',router=useRouter(),{user,loading}=useAuth(),config=useLoad<AppConfig>('/config',false);
+  const [busy,setBusy]=useState(false),[show,setShow]=useState(false),[error,setError]=useState('');
+  useEffect(()=>{if(user&&!loading)router.replace(`/dashboard/${user.role}`);},[user,loading,router]);
+  async function submit(e:React.FormEvent<HTMLFormElement>){
+    e.preventDefault();setError('');setBusy(true);
+    const form=new FormData(e.currentTarget),email=String(form.get('email')).trim(),password=String(form.get('password'));
+    try{
+      if(signup && (password.length<6 || !/[A-Z]/.test(password)||!/[a-z]/.test(password)))throw new Error('Use at least 6 characters, including an uppercase and a lowercase letter.');
+      const result=signup?await authClient.signUp.email({name:String(form.get('name')).trim(),email,password,image:String(form.get('image')||'')||undefined}):await authClient.signIn.email({email,password});
+      if(result.error)throw new Error(result.error.message||'Please check your details and try again.');
+      toast.success(signup?'Welcome to SalonBook. Your account is ready.':'Welcome back.');router.refresh();
+    }catch(err){const message=err instanceof Error?err.message:'Unable to sign in. Please try again.';setError(message);toast.error(message);}finally{setBusy(false);}
+  }
+  async function google(){setBusy(true);setError('');try{const result=await authClient.signIn.social({provider:'google',callbackURL:'/dashboard'});if(result.error)throw new Error(result.error.message||'Google sign-in failed.');}catch(e){setError(e instanceof Error?e.message:'Google sign-in failed.');setBusy(false);}}
+  return <div className="auth-page container"><div className="auth-content"><span className="eyebrow">Your SalonBook moment</span><h1>{signup?<>A little care<br/>starts here.</>:<>Good to have<br/>you back.</>}</h1><p>{signup?'Your favourite services, your appointments, your own little space.':'Your appointments, your next visit, and a little something to look forward to.'}</p><form onSubmit={submit} className="auth-form">{error&&<div className="form-error" role="alert">{error}</div>}{signup&&<div className="field"><label htmlFor="name">Full name</label><input id="name" name="name" autoComplete="name" placeholder="Your name" required minLength={2} maxLength={80}/></div>}<div className="field"><label htmlFor="email">Email address</label><input id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required maxLength={254}/></div><div className="field"><label htmlFor="password">Password</label><div className="password-field"><input id="password" name="password" type={show?'text':'password'} autoComplete={signup?'new-password':'current-password'} placeholder={signup?'Create a password':'Your password'} minLength={signup?6:1} maxLength={128} required/><button type="button" aria-label={show?'Hide password':'Show password'} onClick={()=>setShow(!show)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></div>{signup&&<p className="field-hint">6+ characters, with an uppercase and a lowercase letter.</p>}</div>{signup&&<div className="field"><label htmlFor="image">Profile image URL <span className="muted">(optional)</span></label><input id="image" name="image" type="url" placeholder="https://…"/><p className="field-hint">You can also upload a photo from your profile after joining.</p></div>}<button className="button full" type="submit" disabled={busy}>{busy&&<LoaderCircle className="spin" size={18}/>} {busy?'One moment…':signup?'Create your account':'Sign in'}</button>{config.data?.googleEnabled&&<><div className="form-divider"><span>or</span></div><button type="button" className="button secondary full" onClick={google} disabled={busy}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.97-3.38.97-2.6 0-4.82-1.76-5.61-4.12H3.05v2.59A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.39 13.93a6 6 0 0 1 0-3.86V7.48H3.05a10 10 0 0 0 0 9.04z"/><path fill="#EA4335" d="M12 5.95c1.47 0 2.79.51 3.83 1.51l2.87-2.87A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.95 5.48l3.34 2.59C7.18 7.71 9.4 5.95 12 5.95z"/></svg>Continue with Google</button></>}<p className="auth-switch">{signup?'Already part of SalonBook?':'New around here?'} <Link href={signup?'/sign-in':'/sign-up'}>{signup?'Sign in':'Create an account'}</Link></p></form><p className="auth-security"><ShieldCheck size={15}/> Your details are kept private and secure.</p></div><aside className="auth-image"><img src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1000&q=85" alt="A peaceful salon ready for your next visit"/><div><span className="eyebrow">A moment of your own</span><h2>Sometimes, the best<br/>plan is a little<br/><em>self-care.</em></h2><p>Discover your next good feeling.</p></div></aside></div>;
+}
