@@ -2,23 +2,204 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock,CalendarDays,ShieldCheck,Check,LoaderCircle } from 'lucide-react';
+import { Clock, CalendarDays, ShieldCheck, Check, LoaderCircle } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { useLoad } from '@/lib/use-load';
 import { api } from '@/lib/api';
-import { AppConfig,Service,money,timeLabel } from '@/lib/types';
-import { Loading,Badge } from './loading';
+import { AppConfig, Service, money, timeLabel } from '@/lib/types';
+import { Loading, Badge } from './loading';
 import { ErrorState } from './error-state';
 import { toast } from 'sonner';
-export function ServiceDetail({id}:{id:string}){
-  const {user}=useAuth(),{data,loading,error,reload}=useLoad<{data:Service}>(`/services/${id}`),config=useLoad<AppConfig>('/config',false);
-  const [date,setDate]=useState(''),[slot,setSlot]=useState(''),[busy,setBusy]=useState(false),[formError,setFormError]=useState('');
-  const slots=useLoad<{data:{value:string;available:boolean}[];timeZone:string}>(date?`/services/${id}/slots?date=${date}`:null);
-  const router=useRouter();
-  const today=new Intl.DateTimeFormat('en-CA',{timeZone:config.data?.timeZone||'Asia/Dhaka',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  async function book(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setFormError('');const form=new FormData(e.currentTarget);try{await api('/appointments',{method:'POST',body:JSON.stringify({serviceId:id,appointmentDate:date,timeSlot:slot,message:String(form.get('message')||'')})});toast.success('Your appointment has been requested.');router.push('/dashboard/customer/appointments');}catch(e){const message=e instanceof Error?e.message:'Unable to request appointment.';setFormError(message);toast.error(message);slots.reload();}finally{setBusy(false);}}
-  if(loading)return <Loading label="Getting your service ready…"/>;
-  if(error||!data)return <div className="container section"><ErrorState message={error||'Service not found.'} retry={reload}/></div>;
-  const s=data.data;
-  return <section className="container detail-section"><Link className="back-link" href="/services">Back to all services</Link><div className="detail-grid"><article><div className="detail-photo"><img src={s.image} alt={s.serviceName}/><span className="image-tag">{s.category}</span></div><div className="detail-heading"><h1>{s.serviceName}</h1><strong>{money(s.price)}</strong></div><div className="detail-tags"><span><Clock size={16}/>{s.duration} minutes</span><Badge value={s.status}/></div><p className="detail-description">{s.description}</p><div className="detail-included"><h3>Your moment includes</h3><span><Check size={17}/>A personal consultation</span><span><Check size={17}/>Thoughtful, professional care</span><span><Check size={17}/>A little time to yourself</span></div></article><aside className="booking-panel"><div className="booking-intro"><span className="eyebrow">Make a little room for you</span><h2>Choose your moment.</h2><p>Send a request. We’ll confirm your appointment.</p></div>{user?.role==='admin'?<div className="notice"><p>You’re viewing this service as an administrator. Appointment requests are available to customers.</p><Link className="text-link" href={`/dashboard/admin/services/${id}/edit`}>Manage this service</Link></div>:s.status!=='active'?<div className="notice">This service is currently unavailable.</div>:<form onSubmit={book}>{formError&&<div className="form-error" role="alert">{formError}</div>}<div className="field"><label htmlFor="date">Appointment date</label><input id="date" type="date" required min={today} value={date} onChange={e=>{setDate(e.target.value);setSlot('');}}/></div><div className="field"><label htmlFor="time">Available time</label><select id="time" required value={slot} onChange={e=>setSlot(e.target.value)} disabled={!date||slots.loading||!!slots.error}><option value="">{slots.loading&&date?'Checking availability…':'Choose a time'}</option>{slots.data?.data.map(s=><option key={s.value} value={s.value} disabled={!s.available}>{timeLabel(s.value)}{s.available?'':' · Unavailable'}</option>)}</select>{slots.error?<p className="field-hint" role="alert">{slots.error} <button type="button" className="clear-filters" onClick={slots.reload}>Retry</button></p>:<p className="field-hint">{date&&slots.data?`${slots.data.data.filter(s=>s.available).length} slots available · `:''}Salon time: {config.data?.timeZone||'Asia/Dhaka'}</p>}</div><div className="field"><label htmlFor="message">A note for the salon <span className="muted">(optional)</span></label><textarea id="message" name="message" maxLength={1000} placeholder="Anything you’d like us to know?"/></div><div className="booking-summary"><span>Service total</span><strong>{money(s.price)}</strong></div><button className="button full" disabled={busy||!slot}>{busy?<LoaderCircle className="spin" size={17}/>:<CalendarDays size={17}/>} {busy?'Sending your request…':'Request appointment'}</button><p className="booking-footnote"><ShieldCheck size={15}/>No payment until your appointment is confirmed.</p></form>}</aside></div></section>;
+export function ServiceDetail({ id }: { id: string }) {
+  const { user } = useAuth(),
+    { data, loading, error, reload } = useLoad<{ data: Service }>(`/services/${id}`),
+    config = useLoad<AppConfig>('/config', false);
+  const [date, setDate] = useState(''),
+    [slot, setSlot] = useState(''),
+    [busy, setBusy] = useState(false),
+    [formError, setFormError] = useState('');
+  const slots = useLoad<{ data: { value: string; available: boolean }[]; timeZone: string }>(
+    date ? `/services/${id}/slots?date=${date}` : null,
+  );
+  const router = useRouter();
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: config.data?.timeZone || 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+  async function book(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusy(true);
+    setFormError('');
+    const form = new FormData(e.currentTarget);
+    try {
+      await api('/appointments', {
+        method: 'POST',
+        body: JSON.stringify({
+          serviceId: id,
+          appointmentDate: date,
+          timeSlot: slot,
+          message: String(form.get('message') || ''),
+        }),
+      });
+      toast.success('Your appointment has been requested.');
+      router.push('/dashboard/customer/appointments');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Unable to request appointment.';
+      setFormError(message);
+      toast.error(message);
+      slots.reload();
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (loading) return <Loading label="Getting your service ready…" />;
+  if (error || !data)
+    return (
+      <div className="container section">
+        <ErrorState message={error || 'Service not found.'} retry={reload} />
+      </div>
+    );
+  const s = data.data;
+  return (
+    <section className="container detail-section">
+      <Link className="back-link" href="/services">
+        Back to all services
+      </Link>
+      <div className="detail-grid">
+        <article>
+          <div className="detail-photo">
+            <img src={s.image} alt={s.serviceName} />
+            <span className="image-tag">{s.category}</span>
+          </div>
+          <div className="detail-heading">
+            <h1>{s.serviceName}</h1>
+            <strong>{money(s.price)}</strong>
+          </div>
+          <div className="detail-tags">
+            <span>
+              <Clock size={16} />
+              {s.duration} minutes
+            </span>
+            <Badge value={s.status} />
+          </div>
+          <p className="detail-description">{s.description}</p>
+          <div className="detail-included">
+            <h3>Your moment includes</h3>
+            <span>
+              <Check size={17} />A personal consultation
+            </span>
+            <span>
+              <Check size={17} />
+              Thoughtful, professional care
+            </span>
+            <span>
+              <Check size={17} />A little time to yourself
+            </span>
+          </div>
+        </article>
+        <aside className="booking-panel">
+          <div className="booking-intro">
+            <span className="eyebrow">Make a little room for you</span>
+            <h2>Choose your moment.</h2>
+            <p>Send a request. We’ll confirm your appointment.</p>
+          </div>
+          {user?.role === 'admin' ? (
+            <div className="notice">
+              <p>
+                You’re viewing this service as an administrator. Appointment requests are available
+                to customers.
+              </p>
+              <Link className="text-link" href={`/dashboard/admin/services/${id}/edit`}>
+                Manage this service
+              </Link>
+            </div>
+          ) : s.status !== 'active' ? (
+            <div className="notice">This service is currently unavailable.</div>
+          ) : (
+            <form onSubmit={book}>
+              {formError && (
+                <div className="form-error" role="alert">
+                  {formError}
+                </div>
+              )}
+              <div className="field">
+                <label htmlFor="date">Appointment date</label>
+                <input
+                  id="date"
+                  type="date"
+                  required
+                  min={today}
+                  value={date}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    setSlot('');
+                  }}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="time">Available time</label>
+                <select
+                  id="time"
+                  required
+                  value={slot}
+                  onChange={(e) => setSlot(e.target.value)}
+                  disabled={!date || slots.loading || !!slots.error}
+                >
+                  <option value="">
+                    {slots.loading && date ? 'Checking availability…' : 'Choose a time'}
+                  </option>
+                  {slots.data?.data.map((s) => (
+                    <option key={s.value} value={s.value} disabled={!s.available}>
+                      {timeLabel(s.value)}
+                      {s.available ? '' : ' · Unavailable'}
+                    </option>
+                  ))}
+                </select>
+                {slots.error ? (
+                  <p className="field-hint" role="alert">
+                    {slots.error}{' '}
+                    <button type="button" className="clear-filters" onClick={slots.reload}>
+                      Retry
+                    </button>
+                  </p>
+                ) : (
+                  <p className="field-hint">
+                    {date && slots.data
+                      ? `${slots.data.data.filter((s) => s.available).length} slots available · `
+                      : ''}
+                    Salon time: {config.data?.timeZone || 'Asia/Dhaka'}
+                  </p>
+                )}
+              </div>
+              <div className="field">
+                <label htmlFor="message">
+                  A note for the salon <span className="muted">(optional)</span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  maxLength={1000}
+                  placeholder="Anything you’d like us to know?"
+                />
+              </div>
+              <div className="booking-summary">
+                <span>Service total</span>
+                <strong>{money(s.price)}</strong>
+              </div>
+              <button className="button full" disabled={busy || !slot}>
+                {busy ? <LoaderCircle className="spin" size={17} /> : <CalendarDays size={17} />}{' '}
+                {busy ? 'Sending your request…' : 'Request appointment'}
+              </button>
+              <p className="booking-footnote">
+                <ShieldCheck size={15} />
+                No payment until your appointment is confirmed.
+              </p>
+            </form>
+          )}
+        </aside>
+      </div>
+    </section>
+  );
 }

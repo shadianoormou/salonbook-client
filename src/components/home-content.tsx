@@ -1,22 +1,294 @@
 'use client';
 import Link from 'next/link';
-import { Scissors,Sparkles,Flower2,Heart,Clock,ShieldCheck,CalendarDays,Check } from 'lucide-react';
+import {
+  Scissors,
+  Sparkles,
+  Flower2,
+  Heart,
+  Clock,
+  ShieldCheck,
+  CalendarDays,
+  Check,
+} from 'lucide-react';
 import { useLoad } from '@/lib/use-load';
-import { List,Service } from '@/lib/types';
+import { List, Service } from '@/lib/types';
 import { ServiceCard } from './service-card';
-import { Loading,Empty } from './loading';
+import { Loading, Empty } from './loading';
 import { ErrorState } from './error-state';
-const categoryIcons=[Scissors,Sparkles,Flower2,Heart,Sparkles,Flower2,Heart];
-export function HomeContent(){
-  const services=useLoad<List<Service>>('/services?limit=6',false),categories=useLoad<{data:{name:string;count:number}[]}>('/services/categories',false);
-  return <>
-    <section className="hero"><div className="container hero-grid"><div className="hero-copy"><span className="eyebrow"><span/>A little time, just for you</span><h1>Your time.<br/><em>Beautifully</em><br/>spent.</h1><p>From a fresh cut to a slower afternoon.<br className="desktop-only"/> Discover thoughtful hair, beauty, and wellness care,<br className="desktop-only"/> and make a little room for yourself.</p><div className="hero-buttons"><Link className="button" href="/services">Explore salon services</Link><a className="text-link" href="#how-it-works">How it works</a></div><div className="hero-note"><span className="tiny-icon"><CalendarDays size={18}/></span><span>Choose your service. Request your time.<br/><strong>We’ll take care of the rest.</strong></span></div></div><div className="hero-visual"><div className="hero-photo"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1400&q=90" alt="A welcoming salon with mirrors, styling chairs, and natural light" fetchPriority="high"/><div className="hero-photo-label"><span>THE SALONBOOK EXPERIENCE</span><p>Good hair.<br/>A little self-care.<br/>A whole new feeling.</p></div></div><div className="floating-note"><Flower2 size={26}/><div><strong>Care, with you in mind.</strong><span>Hair · Beauty · Wellness</span></div></div><span className="vertical-caption">MAKE TIME FOR WHAT FEELS GOOD</span></div></div></section>
-    <div className="promise-strip"><div className="container promise-grid"><span><ShieldCheck size={20}/>Secure, personal bookings</span><span><Clock size={20}/>A time that works for you</span><span><Heart size={20}/>Thoughtful care, every visit</span></div></div>
-    <section className="section container" id="categories"><div className="section-intro"><div><span className="eyebrow">Find your kind of care</span><h2>What are you in the mood for?</h2></div><p>Something fresh, something restorative,<br/>something entirely for you.</p></div>{categories.error?<ErrorState message={categories.error} retry={categories.reload}/>:categories.loading?<Loading label="Finding your favourite categories…"/>:<div className="category-grid">{categories.data?.data.map((c,i)=>{const Icon=categoryIcons[i%categoryIcons.length];return <Link className="category-card" href={`/services?category=${encodeURIComponent(c.name)}`} key={c.name}><span><Icon size={25} strokeWidth={1.4}/></span><h3>{c.name}</h3><p>{c.count} {c.count===1?'service':'services'}</p></Link>;})}</div>}</section>
-    <section className="section featured-section"><div className="container"><div className="section-intro"><div><span className="eyebrow">The service edit</span><h2>A fresh start looks good on you.</h2></div><Link className="button secondary" href="/services">View all services</Link></div>{services.loading?<Loading label="Preparing our service menu…"/>:services.error?<ErrorState message={services.error} retry={services.reload}/>:services.data?.data.length?<div className="service-grid">{services.data.data.map(service=><ServiceCard key={service._id} service={service}/>)}</div>:<Empty title="A new menu is on its way" description="Our salon is preparing its services. Please check back soon."/>}</div></section>
-    <section className="section container approach-grid" id="our-approach"><div className="approach-image"><img src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1000&q=85" alt="A calm, carefully designed salon interior" loading="lazy"/><span>A space to feel like yourself.</span></div><div className="approach-copy"><span className="eyebrow">More than an appointment</span><h2>Come as you are.<br/><em>Leave feeling like you.</em></h2><p>We believe the best kind of beauty starts with feeling comfortable. A good conversation, thoughtful service, and space to slow down.</p><ul className="check-list"><li><Check size={18}/>Clear prices, before you book</li><li><Check size={18}/>Appointment requests reviewed by our team</li><li><Check size={18}/>Secure payment after your time is confirmed</li></ul><Link className="button" href="/services">Find your next moment</Link></div></section>
-    <section className="section how-section" id="how-it-works"><div className="container"><div className="center-intro"><span className="eyebrow">A simpler way to book</span><h2>A little care, in three easy steps.</h2></div><div className="how-grid">{[{icon:Scissors,title:'Find your service',text:'Browse our menu and choose the treatment that feels right for you.'},{icon:CalendarDays,title:'Request your time',text:'Choose a date and an available slot. Our team will review your request.'},{icon:Sparkles,title:'Make it yours',text:'Once confirmed, pay securely through Stripe. Then come in and unwind.'}].map(({icon:Icon,title,text})=><article key={title}><span><Icon size={27} strokeWidth={1.4}/></span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
-    <section className="section container faq-grid"><div><span className="eyebrow">Before your visit</span><h2>A few things<br/>you might wonder.</h2><p>A little clarity makes room for a little calm.</p></div><div className="faq-list"><details><summary>When is my appointment confirmed?</summary><p>Your request starts as pending. Our salon team reviews it and confirms your appointment. You can follow the status in your dashboard.</p></details><details><summary>When do I pay?</summary><p>You can pay securely through Stripe after your appointment is confirmed. A pending request does not require payment.</p></details><details><summary>Can I cancel my request?</summary><p>You can cancel your own pending appointment from your dashboard. If your appointment is already confirmed, please contact the salon.</p></details></div></section>
-    <section className="container cta-panel"><div><span className="eyebrow">Your next good feeling</span><h2>Make a little time for you.</h2><p>Your fresh start is only an appointment away.</p></div><Link className="button light" href="/services">Explore salon services</Link></section>
-  </>;
+const categoryIcons = [Scissors, Sparkles, Flower2, Heart, Sparkles, Flower2, Heart];
+export function HomeContent() {
+  const services = useLoad<List<Service>>('/services?limit=6', false),
+    categories = useLoad<{ data: { name: string; count: number }[] }>(
+      '/services/categories',
+      false,
+    );
+  return (
+    <>
+      <section className="hero">
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <span className="eyebrow">
+              <span />A little time, just for you
+            </span>
+            <h1>
+              Your time.
+              <br />
+              <em>Beautifully</em>
+              <br />
+              spent.
+            </h1>
+            <p>
+              From a fresh cut to a slower afternoon.
+              <br className="desktop-only" /> Discover thoughtful hair, beauty, and wellness care,
+              <br className="desktop-only" /> and make a little room for yourself.
+            </p>
+            <div className="hero-buttons">
+              <Link className="button" href="/services">
+                Explore salon services
+              </Link>
+              <a className="text-link" href="#how-it-works">
+                How it works
+              </a>
+            </div>
+            <div className="hero-note">
+              <span className="tiny-icon">
+                <CalendarDays size={18} />
+              </span>
+              <span>
+                Choose your service. Request your time.
+                <br />
+                <strong>We’ll take care of the rest.</strong>
+              </span>
+            </div>
+          </div>
+          <div className="hero-visual">
+            <div className="hero-photo">
+              <img
+                src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1400&q=90"
+                alt="A welcoming salon with mirrors, styling chairs, and natural light"
+                fetchPriority="high"
+              />
+              <div className="hero-photo-label">
+                <span>THE SALONBOOK EXPERIENCE</span>
+                <p>
+                  Good hair.
+                  <br />A little self-care.
+                  <br />A whole new feeling.
+                </p>
+              </div>
+            </div>
+            <div className="floating-note">
+              <Flower2 size={26} />
+              <div>
+                <strong>Care, with you in mind.</strong>
+                <span>Hair · Beauty · Wellness</span>
+              </div>
+            </div>
+            <span className="vertical-caption">MAKE TIME FOR WHAT FEELS GOOD</span>
+          </div>
+        </div>
+      </section>
+      <div className="promise-strip">
+        <div className="container promise-grid">
+          <span>
+            <ShieldCheck size={20} />
+            Secure, personal bookings
+          </span>
+          <span>
+            <Clock size={20} />A time that works for you
+          </span>
+          <span>
+            <Heart size={20} />
+            Thoughtful care, every visit
+          </span>
+        </div>
+      </div>
+      <section className="section container" id="categories">
+        <div className="section-intro">
+          <div>
+            <span className="eyebrow">Find your kind of care</span>
+            <h2>What are you in the mood for?</h2>
+          </div>
+          <p>
+            Something fresh, something restorative,
+            <br />
+            something entirely for you.
+          </p>
+        </div>
+        {categories.error ? (
+          <ErrorState message={categories.error} retry={categories.reload} />
+        ) : categories.loading ? (
+          <Loading label="Finding your favourite categories…" />
+        ) : (
+          <div className="category-grid">
+            {categories.data?.data.map((c, i) => {
+              const Icon = categoryIcons[i % categoryIcons.length];
+              return (
+                <Link
+                  className="category-card"
+                  href={`/services?category=${encodeURIComponent(c.name)}`}
+                  key={c.name}
+                >
+                  <span>
+                    <Icon size={25} strokeWidth={1.4} />
+                  </span>
+                  <h3>{c.name}</h3>
+                  <p>
+                    {c.count} {c.count === 1 ? 'service' : 'services'}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+      <section className="section featured-section">
+        <div className="container">
+          <div className="section-intro">
+            <div>
+              <span className="eyebrow">The service edit</span>
+              <h2>A fresh start looks good on you.</h2>
+            </div>
+            <Link className="button secondary" href="/services">
+              View all services
+            </Link>
+          </div>
+          {services.loading ? (
+            <Loading label="Preparing our service menu…" />
+          ) : services.error ? (
+            <ErrorState message={services.error} retry={services.reload} />
+          ) : services.data?.data.length ? (
+            <div className="service-grid">
+              {services.data.data.map((service) => (
+                <ServiceCard key={service._id} service={service} />
+              ))}
+            </div>
+          ) : (
+            <Empty
+              title="A new menu is on its way"
+              description="Our salon is preparing its services. Please check back soon."
+            />
+          )}
+        </div>
+      </section>
+      <section className="section container approach-grid" id="our-approach">
+        <div className="approach-image">
+          <img
+            src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1000&q=85"
+            alt="A calm, carefully designed salon interior"
+            loading="lazy"
+          />
+          <span>A space to feel like yourself.</span>
+        </div>
+        <div className="approach-copy">
+          <span className="eyebrow">More than an appointment</span>
+          <h2>
+            Come as you are.
+            <br />
+            <em>Leave feeling like you.</em>
+          </h2>
+          <p>
+            We believe the best kind of beauty starts with feeling comfortable. A good conversation,
+            thoughtful service, and space to slow down.
+          </p>
+          <ul className="check-list">
+            <li>
+              <Check size={18} />
+              Clear prices, before you book
+            </li>
+            <li>
+              <Check size={18} />
+              Appointment requests reviewed by our team
+            </li>
+            <li>
+              <Check size={18} />
+              Secure payment after your time is confirmed
+            </li>
+          </ul>
+          <Link className="button" href="/services">
+            Find your next moment
+          </Link>
+        </div>
+      </section>
+      <section className="section how-section" id="how-it-works">
+        <div className="container">
+          <div className="center-intro">
+            <span className="eyebrow">A simpler way to book</span>
+            <h2>A little care, in three easy steps.</h2>
+          </div>
+          <div className="how-grid">
+            {[
+              {
+                icon: Scissors,
+                title: 'Find your service',
+                text: 'Browse our menu and choose the treatment that feels right for you.',
+              },
+              {
+                icon: CalendarDays,
+                title: 'Request your time',
+                text: 'Choose a date and an available slot. Our team will review your request.',
+              },
+              {
+                icon: Sparkles,
+                title: 'Make it yours',
+                text: 'Once confirmed, pay securely through Stripe. Then come in and unwind.',
+              },
+            ].map(({ icon: Icon, title, text }) => (
+              <article key={title}>
+                <span>
+                  <Icon size={27} strokeWidth={1.4} />
+                </span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="section container faq-grid">
+        <div>
+          <span className="eyebrow">Before your visit</span>
+          <h2>
+            A few things
+            <br />
+            you might wonder.
+          </h2>
+          <p>A little clarity makes room for a little calm.</p>
+        </div>
+        <div className="faq-list">
+          <details>
+            <summary>When is my appointment confirmed?</summary>
+            <p>
+              Your request starts as pending. Our salon team reviews it and confirms your
+              appointment. You can follow the status in your dashboard.
+            </p>
+          </details>
+          <details>
+            <summary>When do I pay?</summary>
+            <p>
+              You can pay securely through Stripe after your appointment is confirmed. A pending
+              request does not require payment.
+            </p>
+          </details>
+          <details>
+            <summary>Can I cancel my request?</summary>
+            <p>
+              You can cancel your own pending appointment from your dashboard. If your appointment
+              is already confirmed, please contact the salon.
+            </p>
+          </details>
+        </div>
+      </section>
+      <section className="container cta-panel">
+        <div>
+          <span className="eyebrow">Your next good feeling</span>
+          <h2>Make a little time for you.</h2>
+          <p>Your fresh start is only an appointment away.</p>
+        </div>
+        <Link className="button light" href="/services">
+          Explore salon services
+        </Link>
+      </section>
+    </>
+  );
 }

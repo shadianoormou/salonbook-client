@@ -4,4 +4,18 @@ import { Footer } from '@/components/footer';
 import { Protected } from '@/components/protected';
 import { PaymentResult } from '@/components/payment-result';
 import { Loading } from '@/components/loading';
-export default function Cancel(){return <><Navbar/><main id="main"><Protected role="customer"><Suspense fallback={<Loading/>}><PaymentResult cancelled/></Suspense></Protected></main><Footer/></>;}
+export default function Cancel() {
+  return (
+    <>
+      <Navbar />
+      <main id="main">
+        <Protected role="customer">
+          <Suspense fallback={<Loading />}>
+            <PaymentResult cancelled />
+          </Suspense>
+        </Protected>
+      </main>
+      <Footer />
+    </>
+  );
+}

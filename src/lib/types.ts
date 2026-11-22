@@ -1,10 +1,78 @@
-export type User={id?:string;_id?:string;name:string;email:string;image?:string|null;role:'admin'|'customer';isBlocked?:boolean;phone?:string};
-export type Service={_id:string;serviceName:string;category:string;description:string;price:number;duration:number;image:string;status:'active'|'inactive'};
-export type Appointment={_id:string;serviceId:string;customerId:string;service?:Service;customer?:User;serviceName:string;servicePrice:number;currency:string;appointmentDate:string;timeSlot:string;message?:string;status:'pending'|'confirmed'|'cancelled';paymentStatus:'unpaid'|'paid';createdAt:string};
-export type Transaction={_id:string;customer?:User;appointment?:Appointment;appointmentId:string;amount:number;currency:string;stripeSessionId:string;status:'paid'|'failed';createdAt:string};
-export type List<T>={data:T[];total:number;page:number;pages:number};
-export type AppConfig={googleEnabled:boolean;uploadsEnabled:boolean;paymentsEnabled:boolean;timeZone:string;currency:string};
-export const categories=['Haircut & Styling','Hair Coloring','Hair Treatment','Facial & Skincare','Makeup','Manicure & Pedicure','Spa & Massage'];
-export const money=(value:number,currency='usd')=>new Intl.NumberFormat('en-US',{style:'currency',currency:currency.toUpperCase(),maximumFractionDigits:2}).format(value);
-export const dateLabel=(date:string)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric'}).format(new Date(date.length===10?`${date}T12:00:00`:date));
-export const timeLabel=(time:string)=>{const [h,m]=time.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;};
+export type User = {
+  id?: string;
+  _id?: string;
+  name: string;
+  email: string;
+  image?: string | null;
+  role: 'admin' | 'customer';
+  isBlocked?: boolean;
+  phone?: string;
+};
+export type Service = {
+  _id: string;
+  serviceName: string;
+  category: string;
+  description: string;
+  price: number;
+  duration: number;
+  image: string;
+  status: 'active' | 'inactive';
+};
+export type Appointment = {
+  _id: string;
+  serviceId: string;
+  customerId: string;
+  service?: Service;
+  customer?: User;
+  serviceName: string;
+  servicePrice: number;
+  currency: string;
+  appointmentDate: string;
+  timeSlot: string;
+  message?: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  paymentStatus: 'unpaid' | 'paid';
+  createdAt: string;
+};
+export type Transaction = {
+  _id: string;
+  customer?: User;
+  appointment?: Appointment;
+  appointmentId: string;
+  amount: number;
+  currency: string;
+  stripeSessionId: string;
+  status: 'paid' | 'failed';
+  createdAt: string;
+};
+export type List<T> = { data: T[]; total: number; page: number; pages: number };
+export type AppConfig = {
+  googleEnabled: boolean;
+  uploadsEnabled: boolean;
+  paymentsEnabled: boolean;
+  timeZone: string;
+  currency: string;
+};
+export const categories = [
+  'Haircut & Styling',
+  'Hair Coloring',
+  'Hair Treatment',
+  'Facial & Skincare',
+  'Makeup',
+  'Manicure & Pedicure',
+  'Spa & Massage',
+];
+export const money = (value: number, currency = 'usd') =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: 2,
+  }).format(value);
+export const dateLabel = (date: string) =>
+  new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(
+    new Date(date.length === 10 ? `${date}T12:00:00` : date),
+  );
+export const timeLabel = (time: string) => {
+  const [h, m] = time.split(':').map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+};
