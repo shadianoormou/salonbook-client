@@ -6,7 +6,7 @@ export async function api<T>(path:string,options:RequestInit={},protectedRequest
   if(!(options.body instanceof FormData))headers.set('Content-Type','application/json');
   if(protectedRequest){
     const {data,error}=await authClient.token();
-    if(error || !data?.token)throw new ApiError('Please sign in to continue.',401);
+    if(error || !data?.token)throw new ApiError(error?.message||'Please sign in to continue.',401);
     headers.set('Authorization',`Bearer ${data.token}`);
   }
   const response=await fetch(`/api${path}`,{...options,headers,credentials:'include',cache:'no-store'});
