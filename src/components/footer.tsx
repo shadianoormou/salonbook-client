@@ -51,6 +51,7 @@ export function Footer() {
           <Link href="/services">Explore our services</Link>
           <Link href="/sign-up">Create an account</Link>
           <Link href="/sign-in">Manage your appointments</Link>
+          <Link href="/privacy">Privacy</Link>
         </div>
         <div>
           <h3>Come say hello</h3>
