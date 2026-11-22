@@ -6,7 +6,8 @@ A responsive salon appointment booking platform for Assignment 9, Category 002. 
 
 - Client: https://github.com/shadianoormou/salonbook-client
 - Server: https://github.com/shadianoormou/salonbook-server
-- Live website: pending production deployment and service credentials.
+- Live website: https://salonbook-client-nu.vercel.app
+- Live API: https://salonbook-server-beryl.vercel.app
 
 ## Features
 
@@ -65,6 +66,6 @@ Do not use static export or GitHub Pages: the application needs its Next.js serv
 
 ## Verification status
 
-TypeScript and the optimized production build passed. Browser checks covered registration, role redirect, persistent sessions, service search, appointment request, admin confirmation, and mobile navigation. Real Google OAuth, ImgBB delivery, actual Stripe test-mode Checkout, and production verification still require the corresponding account configuration.
+TypeScript and the optimized production build passed. Browser checks covered registration, role redirect, persistent sessions, service search, appointment request, admin confirmation, and mobile navigation. Production checks also passed for Google sign-in, administrator email sign-in, database-backed services, customer booking, administrator confirmation, session refresh, JWT access, and ImgBB image delivery. Google OAuth is published for basic profile/email access. Stripe Checkout remains disabled until a usable Stripe test secret and webhook signing secret are configured; real Checkout has not been tested.
 
 Salon contact information and social destinations are demonstration details. Service photographs are served from Unsplash. Replace them with the salon's actual details before a business launch.
